@@ -255,58 +255,20 @@ public abstract class Critter {
 	
 	public static void worldTimeStep() {
 		//Do time step for each critter
-		for(Critter c:population){
-			c.walkRun=false;
-			c.doTimeStep();
-		}
-		//Have list to hold critters at each position
-		grid=new Critter[Params.world_height][Params.world_width];
-		//Resolve conflicts for each coordinate
-		Critter a,b;
-		boolean aFightB,bFightA;
-		int diceRollA;
-		int diceRollB;
-		for(int i=0;i<population.size();i++){
-			a=population.get(i);
-			for(int j=i+1;j<population.size();j++){
-				b=population.get(j);
-				if(a.energy<=0){
-					break;
-				}
-				if(b.energy<=0){
-					continue;
-				}
-				
-				aFightB=a.fight(b.toString());
-				bFightA=b.fight(a.toString());
-				diceRollA=0;
-				diceRollB=0;
-				if((aFightB || bFightA) && sameLocation(a,b)){
-					if(aFightB){
-						diceRollA=getRandomInt(a.energy+1);
-					}
-					if(bFightA){
-						diceRollB=getRandomInt(b.energy+1);
-					}
-					if(diceRollA>diceRollB){
-						a.energy=a.getEnergy()+b.getEnergy()/2;
-						b.energy=0;
-					}else{
-						b.energy=b.getEnergy()+a.getEnergy()/2;
-						a.energy=0;
-					}
-				}
-				
-			}
-		}
-		//Update rest energy and grid
-		for(Critter c:population){
-			c.energy=c.getEnergy()-Params.rest_energy_cost;
-			if(c.energy>0){
-				grid[c.y_coord][c.x_coord]=c;
-			}
-		}
+		doTimeStepForEachCritter();
 		
+		
+		resolveEncountersBetweenCritters();
+		
+		updateEnergyMakeGrid();
+		
+		generateAlgae();
+	
+		removeDead();
+	
+		addBabies();
+	}
+	public static void generateAlgae(){
 		//Generate algae
 		Critter al;
 		int made=0;
@@ -315,8 +277,14 @@ public abstract class Critter {
 			al.energy=Params.start_energy;
 			al.x_coord=getRandomInt(Params.world_width);
 			al.y_coord=getRandomInt(Params.world_height);
+			population.add(al);
 			made++;
 		}
+		
+		
+		
+	}
+	public static void removeDead(){
 		//Remove dead critters
 		for(int i=0;i<population.size();i++){
 			if(population.get(i).energy<=0){
@@ -324,10 +292,78 @@ public abstract class Critter {
 				i--;
 			}   
 		}
-		//Add babies to population
-		population.addAll(babies);
+		
+		
 	}
-
+	public static void addBabies(){
+		//Add babies to population
+				population.addAll(babies);
+				babies.clear();
+		
+		
+	}
+	public static void doTimeStepForEachCritter(){
+		//Do time step for each critter
+		for(Critter c:population){
+			c.walkRun=false;
+			c.doTimeStep();
+		}
+	}
+	public static void updateEnergyMakeGrid(){
+		//Have list to hold critters at each position
+				grid=new Critter[Params.world_height][Params.world_width];
+		//Update rest energy and grid
+		for(Critter c:population){
+			c.energy=c.getEnergy()-Params.rest_energy_cost;
+			if(c.energy>0){
+				grid[c.y_coord][c.x_coord]=c;
+			}
+		}
+		
+		
+		
+		
+	}
+	public static void resolveEncountersBetweenCritters(){
+		//Resolve conflicts for each coordinate
+				Critter a,b;
+				boolean aFightB,bFightA;
+				int diceRollA;
+				int diceRollB;
+				for(int i=0;i<population.size();i++){
+					a=population.get(i);
+					for(int j=i+1;j<population.size();j++){
+						b=population.get(j);
+						if(a.energy<=0){
+							break;
+						}
+						if(b.energy<=0){
+							continue;
+						}
+						
+						aFightB=a.fight(b.toString());
+						bFightA=b.fight(a.toString());
+						diceRollA=0;
+						diceRollB=0;
+						if((aFightB || bFightA) && sameLocation(a,b)){
+							if(aFightB){
+								diceRollA=getRandomInt(a.energy+1);
+							}
+							if(bFightA){
+								diceRollB=getRandomInt(b.energy+1);
+							}
+							if(diceRollA>diceRollB){
+								a.energy=a.getEnergy()+b.getEnergy()/2;
+								b.energy=0;
+							}else{
+								b.energy=b.getEnergy()+a.getEnergy()/2;
+								a.energy=0;
+							}
+						}
+						
+					}
+				}
+	}
 	
 	
 	public static void displayWorld() {
