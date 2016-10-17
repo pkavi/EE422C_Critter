@@ -124,16 +124,23 @@ public abstract class Critter {
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
 		Class<?> in;
 		Critter c;
+		Object objectIn;
 		//Check if class exists
 		try {
 			 in=Class.forName(myPackage+"."+critter_class_name);
 		} catch( ClassNotFoundException e ) {
 			 throw new InvalidCritterException(critter_class_name);
 		}
-		//-----------------------------Have not implemented newInstance() usage
 		//Check if class is instance of critter
+		
 		try{
-			c=(Critter)in.newInstance();
+			objectIn=in.newInstance();
+			if(objectIn instanceof Critter){
+				c=(Critter)objectIn;
+			}
+			else{
+				throw new InvalidCritterException(critter_class_name);
+			}
 			
 		}
 		catch(IllegalAccessException ex){
@@ -167,7 +174,32 @@ public abstract class Critter {
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
-	
+		Class<?> in;
+		Object objectIn;
+		try {
+			 in=Class.forName(myPackage+"."+critter_class_name);
+		} catch( ClassNotFoundException e ) {
+			 throw new InvalidCritterException(critter_class_name);
+		}
+		//Check if object is actually isntance of critter if so initilaize it
+		try{
+			
+			objectIn=in.newInstance();
+			
+			
+		}
+		catch(IllegalAccessException ex){
+			throw new InvalidCritterException(critter_class_name);
+		}
+		catch(InstantiationException ex){
+			throw new InvalidCritterException(critter_class_name);
+		}
+		for(Critter c:population){
+			if(c.getClass().isInstance(objectIn)){
+				result.add(c);
+			}
+		}
+		
 		return result;
 	}
 	

@@ -11,8 +11,11 @@
  * Fall 2016
  */
 package assignment4; // cannot be in default package
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.io.*;
+import java.lang.reflect.Method;
 
 
 /*
@@ -99,6 +102,8 @@ public class Main {
     		}
     		else if(firstArg.equals("make")){
     			parseMake(inputArgs,input);
+    		}else if(firstArg.equals("stats")){
+    			parseStats(inputArgs,input);
     		}
     		else{//To do
     			System.out.println("Invalid input");
@@ -192,7 +197,7 @@ public class Main {
  			}catch(InvalidCritterException ex){
  				//To finish
  			System.out.println("No critter found");
- 			
+ 			return;
  			}
  	} 
     	else{
@@ -200,6 +205,39 @@ public class Main {
     		
     	}
     }
+    public static void parseStats(String[] inputArgs,String input){
+    	int seed=0;
+    	 if(inputArgs.length==2 && inputArgs[0].equals("stats")){
+    		 List<Critter> res;
+    		 try{
+    		 res=Critter.getInstances(inputArgs[1]);
+    		 runStatsMethod(inputArgs[1],res);
+    		 }catch(InvalidCritterException ex){
+    			 //To finish
+    			 System.out.println("Critter not found");
+    			 return;
+    		 }
+    		 
+    	}
+    	else{
+    		System.out.println("error processing: "+input.trim());
+    		
+    	}
+    }
+    //See http://stackoverflow.com/questions/9042740/call-static-method-given-a-class-object-in-java
+    public static void runStatsMethod(String critter_class_name,List<Critter> res) throws InvalidCritterException{
+    	try{
+    	Class<?> inClass=Class.forName(myPackage+"."+critter_class_name);
+    	Method inMethod=inClass.getMethod("runStats",List.class);
+    			inMethod.invoke(res);
+    	}catch(Exception ex){//Still need to do
+    		ex.printStackTrace(System.out);
+    		throw new InvalidCritterException(critter_class_name);
+    		
+    	}
+    	
+    }
+   
     
     
 }
