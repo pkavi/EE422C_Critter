@@ -292,7 +292,7 @@ public abstract class Critter {
 		
 		resolveEncountersBetweenCritters();
 		
-		updateEnergyMakeGrid();
+		updateEnergyMakeGrid();//Rest energy subtract and make new grid
 		
 		generateAlgae();
 	
@@ -377,7 +377,7 @@ public abstract class Critter {
 						bFightA=b.fight(a.toString());
 						diceRollA=0;
 						diceRollB=0;
-						if((aFightB || bFightA) && sameLocation(a,b)){
+						if(a.getEnergy()>0&& b.getEnergy()>0 && sameLocation(a,b)){//What happens if a and b decide to not fight but are in the same location
 							if(aFightB){
 								diceRollA=getRandomInt(a.energy+1);
 							}
