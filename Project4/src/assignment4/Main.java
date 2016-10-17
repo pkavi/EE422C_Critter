@@ -86,7 +86,7 @@ public class Main {
     	while(!quit){
     		System.out.print("Critter>");
     		input=kb.nextLine();
-    		inputArgs=input.trim().split("\\s");
+    		inputArgs=input.trim().split("\\s+");
     		firstArg=inputArgs[0];
     		if(firstArg.equals("quit")){
     			quit=parseQuit(inputArgs,input);
