@@ -28,8 +28,10 @@ public abstract class Critter {
 	//Coordinates that are occupied
 	private static Critter[][] grid=new Critter[Params.world_height][Params.world_width];
 	
-	
+	//boolean to keep track of if critter walk or ran during this time step
 	boolean walkRun=false;
+	//boolean to keep track whether walkRun is being called in timeStep or in fight
+	boolean inTimeStep=false; //Set to false when doing a time step but set to true otherwise
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -56,9 +58,11 @@ public abstract class Critter {
 	private int y_coord;
 	
 	protected final void walk(int direction) {
-		if(walkRun==false){
+		if(walkRun==false && inTimeStep){
 		runWalkExecute(1,direction);
 		walkRun=true;
+		}else if(walkRun==false){
+			
 		}
 		energy-=Params.walk_energy_cost;
 		
@@ -338,7 +342,9 @@ public abstract class Critter {
 		//Do time step for each critter
 		for(Critter c:population){
 			c.walkRun=false;
+			c.inTimeStep=true;
 			c.doTimeStep();
+			c.inTimeStep=false;
 		}
 	}
 	public static void updateEnergyMakeGrid(){
@@ -364,8 +370,10 @@ public abstract class Critter {
 				int diceRollB;
 				for(int i=0;i<population.size();i++){
 					a=population.get(i);
+					a.inTimeStep=false;
 					for(int j=i+1;j<population.size();j++){
 						b=population.get(j);
+						b.inTimeStep=false;
 						if(a.energy<=0){
 							break;
 						}
@@ -436,4 +444,12 @@ public abstract class Critter {
 		}
 		return false;
 	}
+	public static boolean occupied(int x, int y){
+		for(Critter c:population){
+			
+		}
+		
+		return false;
+	}
+	
 }
