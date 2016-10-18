@@ -29,9 +29,9 @@ public class Main {
     private static String inputFile;	// input file, used instead of keyboard input if specified
     static ByteArrayOutputStream testOutputString;	// if test specified, holds all console output
     private static String myPackage;	// package of Critter file.  Critter cannot be in default pkg.
-    private static boolean DEBUG = false; // Use it or not, as you wish!
+    public static boolean DEBUG = true; // Use it or not, as you wish!
     static PrintStream old = System.out;	// if you want to restore output to console
-
+    
 
     // Gets the package name.  The usage assumes that Critter and its subclasses are all in the same package.
     static {
@@ -214,6 +214,9 @@ public class Main {
     		 runStatsMethod(inputArgs[1],res);
     		 }catch(InvalidCritterException ex){
     			 //To finish
+    			 if(DEBUG){
+    				 System.out.println("Problem in parseStatsMethod");
+    			 }
     			 System.out.println("Critter not found");
     			 return;
     		 }
@@ -229,9 +232,12 @@ public class Main {
     	try{
     	Class<?> inClass=Class.forName(myPackage+"."+critter_class_name);
     	Method inMethod=inClass.getMethod("runStats",List.class);
-    			inMethod.invoke(res);
+    			inMethod.invoke(null,res);
     	}catch(Exception ex){//Still need to do
+    		if(DEBUG){
     		ex.printStackTrace(System.out);
+    		System.out.println("Problem in Stats method");
+    		}
     		throw new InvalidCritterException(critter_class_name);
     		
     	}

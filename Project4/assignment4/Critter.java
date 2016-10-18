@@ -32,6 +32,7 @@ public abstract class Critter {
 	boolean walkRun=false;
 	//boolean to keep track whether walkRun is being called in doTimeStep or in fight
 	boolean inTimeStep=false; //Set to false when doing a time step but set to true otherwise
+	
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -169,8 +170,12 @@ public abstract class Critter {
 		//Check if class exists
 		try {
 			 in=Class.forName(myPackage+"."+critter_class_name);
-		} catch( ClassNotFoundException e ) {
+		} catch( ClassNotFoundException ex ) {
 			 throw new InvalidCritterException(critter_class_name);
+		}
+		catch(LinkageError ex){
+			throw new InvalidCritterException(critter_class_name);
+			
 		}
 		//Check if class is instance of critter
 		
@@ -216,27 +221,18 @@ public abstract class Critter {
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
 		Class<?> in;
-		Object objectIn;
 		try {
 			 in=Class.forName(myPackage+"."+critter_class_name);
 		} catch( ClassNotFoundException e ) {
+			if(Main.DEBUG){
+				System.out.println("Problem in getInstances method: ClassNotFound");
+			}
 			 throw new InvalidCritterException(critter_class_name);
 		}
 		//Check if object is actually isntance of critter if so initilaize it
-		try{
-			
-			objectIn=in.newInstance();
-			
-			
-		}
-		catch(IllegalAccessException ex){
-			throw new InvalidCritterException(critter_class_name);
-		}
-		catch(InstantiationException ex){
-			throw new InvalidCritterException(critter_class_name);
-		}
+
 		for(Critter c:population){
-			if(c.getClass().isInstance(objectIn)){
+			if(in.isAssignableFrom(c.getClass())){
 				result.add(c);
 			}
 		}
