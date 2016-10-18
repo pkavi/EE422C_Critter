@@ -30,7 +30,7 @@ public abstract class Critter {
 	
 	//boolean to keep track of if critter walk or ran during this time step
 	boolean walkRun=false;
-	//boolean to keep track whether walkRun is being called in timeStep or in fight
+	//boolean to keep track whether walkRun is being called in doTimeStep or in fight
 	boolean inTimeStep=false; //Set to false when doing a time step but set to true otherwise
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
@@ -62,9 +62,41 @@ public abstract class Critter {
 		runWalkExecute(1,direction);
 		walkRun=true;
 		}else if(walkRun==false){
-			
+			if(validMove(1,direction)){
+				runWalkExecute(1,direction);
+			}
+			walkRun=true;
 		}
 		energy-=Params.walk_energy_cost;
+		
+	}
+	public boolean validMove(int steps,int direction){
+		int xNew=x_coord;
+		int yNew=y_coord;
+		if(direction==0 || direction==1 || direction==7){
+			xNew+=steps;
+		}
+		if(direction==3 || direction==4 || direction==5){
+			xNew-=steps;
+		}
+		if(direction==1 || direction==2 || direction==3){
+			yNew-=steps;
+		}
+		if(direction==5 || direction==6 || direction==7){
+			yNew+=steps;
+		}
+		if(xNew<0){
+			xNew+=Params.world_width;
+		}
+		if(yNew<0){
+			yNew+=Params.world_height;
+		}
+		xNew=xNew%Params.world_width;
+		yNew=yNew%Params.world_height;
+		if(!occupied(xNew,yNew)){
+			return true;
+		}
+		return false;
 		
 	}
 	protected final void runWalkExecute(int steps, int direction){
@@ -91,9 +123,14 @@ public abstract class Critter {
 	}
 	
 	protected final void run(int direction) {
-		if(walkRun==false){
+		if(walkRun==false && inTimeStep){
 		runWalkExecute(2,direction);
 		walkRun=true;
+		}else if(walkRun==false){
+			if(validMove(2,direction)){
+				runWalkExecute(2,direction);
+			}
+			walkRun=true;
 		}
 		energy-=Params.run_energy_cost;
 	}
@@ -446,7 +483,9 @@ public abstract class Critter {
 	}
 	public static boolean occupied(int x, int y){
 		for(Critter c:population){
-			
+			if(c.energy>0 && c.x_coord==x && c.y_coord==y){
+				return true;
+			}
 		}
 		
 		return false;
