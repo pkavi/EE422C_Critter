@@ -68,18 +68,21 @@ public abstract class Critter {
 	 * @param direction the direction in which the critter should move
 	 */
 	protected final void walk(int direction) {
+		//Only walk if the not walked this time step
 		if(walkRun==false && inTimeStep){
-		runWalkExecute(1,direction);
-		walkRun=true;
-		}else if(walkRun==false){
+			runWalkExecute(1,direction);
+			walkRun=true;
+		}
+		//Walk during fight step if not walked yet
+		else if(walkRun==false){
 			if(validMove(1,direction)){
 				runWalkExecute(1,direction);
 			}
 			walkRun=true;
 		}
 		energy-=Params.walk_energy_cost;
-		
 	}
+	
 	/**
 	 * Checks if the Critter can move into the spot specified by steps and direction in relation to Critter's current position
 	 * @param steps Number of steps to take in direction
@@ -109,12 +112,13 @@ public abstract class Critter {
 		}
 		xNew=xNew%Params.world_width;
 		yNew=yNew%Params.world_height;
+		//Check if position is occupied if not then return true
 		if(!occupied(xNew,yNew)){
 			return true;
 		}
 		return false;
-		
 	}
+	
 	/**
 	 * Moves critter in a direction with specified number of steps
 	 * @param steps The number of steps to move the Critter.
@@ -142,6 +146,7 @@ public abstract class Critter {
 		x_coord=x_coord%Params.world_width;
 		y_coord=y_coord%Params.world_height;
 	}
+	
 	/**
 	 * If called in doTimeStep() of Critter: makes Critter move 2 spaces in specified direction(always successful)
 	 * If called in fight() of Critter: attempts to move Critter 2 spaces in specified direction(only successful if space open)
@@ -199,15 +204,13 @@ public abstract class Critter {
 		//Check if class exists
 		try {
 			 in=Class.forName(myPackage+"."+critter_class_name);
-		} catch( ClassNotFoundException ex ) {
+		}catch(ClassNotFoundException ex ) {
 			 throw new InvalidCritterException(critter_class_name);
 		}
 		catch(LinkageError ex){
 			throw new InvalidCritterException(critter_class_name);
-			
 		}
 		//Check if class is instance of critter
-		
 		try{
 			objectIn=in.newInstance();
 			if(objectIn instanceof Critter){
@@ -216,7 +219,6 @@ public abstract class Critter {
 			else{
 				throw new InvalidCritterException(critter_class_name);
 			}
-			
 		}
 		catch(IllegalAccessException ex){
 			throw new InvalidCritterException(critter_class_name);
@@ -230,15 +232,8 @@ public abstract class Critter {
 		c.energy=Params.start_energy;
 		c.x_coord=getRandomInt(Params.world_width);
 		c.y_coord=getRandomInt(Params.world_height);
-		
-		
-		
-		
-		
-		
-	
-	
-	
+		//Re-populate the grid 
+		makeGrid();
 	}
 	
 	/**
@@ -360,23 +355,24 @@ public abstract class Critter {
 	public static void worldTimeStep() {
 		//Do time step for each critter
 		doTimeStepForEachCritter();
-		
-		
+		//Resolve encounters over overlapping critters
 		resolveEncountersBetweenCritters();
-		
-		updateEnergyMakeGrid();//Rest energy subtract and make new grid
-		
+		//Update the rest energy
+		updateEnergy();
+		//Generate the algae
 		generateAlgae();
-	
+		//Remove the dead from the population
 		removeDead();
-	
+		//Add the babies to the population
 		addBabies();
+		//Make the new display grid
+		makeGrid();
 	}
+	
 	/**
 	 * Generates algae and adds them to population
 	 */
 	public static void generateAlgae(){
-		//Generate algae
 		Critter al;
 		int made=0;
 		while(made<Params.refresh_algae_count){
@@ -387,10 +383,8 @@ public abstract class Critter {
 			population.add(al);
 			made++;
 		}
-		
-		
-		
 	}
+	
 	/**
 	 * Removes the dead critters from population
 	 */
@@ -405,6 +399,7 @@ public abstract class Critter {
 		
 		
 	}
+	
 	/**
 	 * Adds the babies to the population
 	 */
@@ -422,30 +417,37 @@ public abstract class Critter {
 	public static void doTimeStepForEachCritter(){
 		//Do time step for each critter
 		for(Critter c:population){
-			c.walkRun=false;
-			c.inTimeStep=true;
+			c.walkRun=false; 
+			c.inTimeStep=true; 
 			c.doTimeStep();
-			c.inTimeStep=false;
+			c.inTimeStep=false; 
 		}
 	}
+	
 	/**
 	 * Updates the energy of each Critter and populates a 2d grid array
 	 */
-	public static void updateEnergyMakeGrid(){
-		//Have list to hold critters at each position
-				grid=new Critter[Params.world_height][Params.world_width];
-		//Update rest energy and grid
+	public static void updateEnergy(){
+			//Update rest energy and grid
 		for(Critter c:population){
 			c.energy=c.getEnergy()-Params.rest_energy_cost;
+		}
+	}
+	
+	/**
+	 * Make a new grid for every
+	 */
+	public static void makeGrid(){
+		//Have list to hold critters at each position
+		grid=new Critter[Params.world_height][Params.world_width];
+		//Update rest energy and grid
+		for(Critter c:population){
 			if(c.energy>0){
 				grid[c.y_coord][c.x_coord]=c;
 			}
 		}
-		
-		
-		
-		
 	}
+	
 	/**
 	 * Resolves encounters between critters
 	 */
@@ -455,24 +457,31 @@ public abstract class Critter {
 				boolean aFightB,bFightA;
 				int diceRollA;
 				int diceRollB;
+				//Go through each Critter in the population
 				for(int i=0;i<population.size();i++){
 					a=population.get(i);
 					a.inTimeStep=false;
 					for(int j=i+1;j<population.size();j++){
 						b=population.get(j);
 						b.inTimeStep=false;
+						//If a's energy is less then 0 no need to check
 						if(a.energy<=0){
 							break;
 						}
+						//If b's energy is less then 0 go to next Critter
 						if(b.energy<=0){
 							continue;
 						}
-						
+						if(!sameLocation(a, b)){
+							continue;
+						}
+						//See if each Critter want to fight each other
 						aFightB=a.fight(b.toString());
 						bFightA=b.fight(a.toString());
 						diceRollA=0;
 						diceRollB=0;
-						if(a.getEnergy()>0&& b.getEnergy()>0 && sameLocation(a,b)){//What happens if a and b decide to not fight but are in the same location
+						//Only replace one critter with the other if both are in the same location and have energy greater than zero
+						if(a.getEnergy()>0&& b.getEnergy()>0 && sameLocation(a,b)){
 							if(aFightB){
 								diceRollA=getRandomInt(a.energy+1);
 							}
@@ -511,8 +520,8 @@ public abstract class Critter {
 			System.out.print("|\n");
 		}
 		displayHeader(grid[0].length);
-		
 	}
+	
 	/**
 	 * Displays the top/bottom portion of the grid view plus sign followed by hyphens then a plus sign
 	 * @param length The width of the world.
@@ -524,12 +533,25 @@ public abstract class Critter {
 		}
 		System.out.print("+\n");
 	}
+	
+	/**
+	 * Checks if the critters are in the same location 
+	 * @param a First Critter
+	 * @param b Second Critter
+	 * @return True if both critters are in the same location, false otherwise
+	 */
 	public static boolean sameLocation(Critter a,Critter b){
 		if(a.x_coord==b.x_coord && b.y_coord==a.y_coord){
 			return true;
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if the current critter's location is occupied
+	 * @param a Critter
+	 * @return 
+	 */
 	public static boolean occupied(Critter a){
 		for(Critter c:population){
 			if(c.energy>0 && sameLocation(a,c)){
@@ -538,6 +560,13 @@ public abstract class Critter {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if the current x and y coordinate are free
+	 * @param x X coordinate or column to check
+	 * @param y Y coordinate or row to check
+	 * @return
+	 */
 	public static boolean occupied(int x, int y){
 		for(Critter c:population){
 			if(c.energy>0 && c.x_coord==x && c.y_coord==y){
