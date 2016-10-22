@@ -1,13 +1,9 @@
 /* CRITTERS Main.java
  * EE422C Project 4 submission by
- * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
- * Slip days used: <0>
+ * Pranav Kavikondala
+ * pk6994
+ * 16470
+ * Slip days used: 0
  * Fall 2016
  */
 package assignment4; // cannot be in default package
@@ -72,18 +68,22 @@ public class Main {
         /* Do not alter the code above for your submission. */
         /* Write your code below. */
         
-      //  System.out.println("GLHF");
         runProgram();
         /* Write your code above */
         System.out.flush();
 
     }
-    public static void runProgram(){
+    
+    /**
+     * Runs the whole program
+     */
+    protected static void runProgram(){
     	boolean quit=false;
     	String input;
     	String[] inputArgs;
     	String firstArg;
     	while(!quit){
+    		//Output prompt and see if command valid
     		System.out.print("critters>");
     		input=kb.nextLine();
     		inputArgs=input.trim().split("\\s+");
@@ -105,18 +105,18 @@ public class Main {
     		}else if(firstArg.equals("stats")){
     			parseStats(inputArgs,input);
     		}
-    		else{//To do
+    		else{
     			System.out.println("Invalid input");
     		}
-    		
-    		
-    		
     	}
-    	
-    	
     }
   
-    public static void parseShow(String[] inputArgs,String input){
+    /**
+     * Parses any command that starts with show
+     * @param inputArgs String array of the input tokens for line
+     * @param input String of whole line input
+     */
+    protected static void parseShow(String[] inputArgs,String input){
     	if(inputArgs.length==1 && inputArgs[0].equals("show")){
     	Critter.displayWorld();
     	}
@@ -124,7 +124,14 @@ public class Main {
     		System.out.println("error processing: "+input.trim());
     	}
     }
-    public static boolean parseQuit(String[] inputArgs,String input){
+    
+    /**
+     * Parse any command that begins with quit
+     * @param inputArgs String array of the input tokens for line
+     * @param input  String of whole line input
+     * @return boolean True if user wants to quit
+     */
+    protected static boolean parseQuit(String[] inputArgs,String input){
     	if(inputArgs.length==1 && inputArgs[0].equals("quit")){
     		return true;
     	}
@@ -133,7 +140,13 @@ public class Main {
     		return false;
     	}
     }
-    public static void parseStep(String[] inputArgs,String input){
+    
+    /**
+     * Parses any command that begins with step
+     * @param inputArgs String array of the input tokens for line
+     * @param input String of whole line input
+     */
+    protected static void parseStep(String[] inputArgs,String input){
     	int step=0;
     	if(inputArgs.length==1 && inputArgs[0].equals("step")){
     		Critter.worldTimeStep();
@@ -154,7 +167,13 @@ public class Main {
     		
     	}
     }
-    public static void parseSeed(String[] inputArgs,String input){
+    
+    /**
+     * Parses any command that begins with seed
+     * @param inputArgs String array of the input tokens for line
+     * @param input String of whole line input
+     */
+    protected static void parseSeed(String[] inputArgs,String input){
     	int seed=0;
     	 if(inputArgs.length==2 && inputArgs[0].equals("seed")){
     		try{
@@ -170,19 +189,24 @@ public class Main {
     		
     	}
     }
-    public static void parseMake(String[] inputArgs,String input){
+    
+    /**
+     * Parses any command that begins with make
+     * @param inputArgs String array of the input tokens for line
+     * @param input String of whole line input
+     */
+    protected static void parseMake(String[] inputArgs,String input){
     	String name;
     	int numCreated=0;
-    	 if(inputArgs.length==2  && inputArgs[0].equals("make")){
-  
-    			name=inputArgs[1];
+    	if(inputArgs.length==2  && inputArgs[0].equals("make")){
+    		name=inputArgs[1];
     		try{
-    		Critter.makeCritter(name);
+    			Critter.makeCritter(name);
     		}catch(InvalidCritterException ex){
-    			//To do
+    			System.out.println("error processing: "+input.trim());
+    			return;
     		}
-  
-    	} 
+    	 } 
     	 else if(inputArgs.length==3  && inputArgs[0].equals("make")){
  			name=inputArgs[1];
  			try{
@@ -196,17 +220,22 @@ public class Main {
  					Critter.makeCritter(name);
  				}
  			}catch(InvalidCritterException ex){
- 				//To finish
- 			System.out.println("No critter found");
- 			return;
+ 				System.out.println("error processing: "+input.trim());
+ 				return;
  			}
- 	} 
+    	} 
     	else{
     		System.out.println("error processing: "+input.trim());
     		
     	}
     }
-    public static void parseStats(String[] inputArgs,String input){
+    
+    /**
+     * Parses any command that begins with stats
+     * @param inputArgs String array of the input tokens for line
+     * @param input String of whole line input
+     */
+    protected static void parseStats(String[] inputArgs,String input){
     	int seed=0;
     	 if(inputArgs.length==2 && inputArgs[0].equals("stats")){
     		 List<Critter> res;
@@ -218,7 +247,8 @@ public class Main {
     			 if(DEBUG){
     				 System.out.println("Problem in parseStatsMethod");
     			 }
-    			 System.out.println("Critter not found");
+    			 System.out.println("error processing: "+input.trim());
+    			 
     			 return;
     		 }
     		 
@@ -229,12 +259,19 @@ public class Main {
     	}
     }
     //See http://stackoverflow.com/questions/9042740/call-static-method-given-a-class-object-in-java
-    public static void runStatsMethod(String critter_class_name,List<Critter> res) throws InvalidCritterException{
+
+    /**
+     * Runs the stat method with res from getInstances with critter_class_name
+     * @param critter_class_name Name of critter class to run Stats on
+     * @param res List of critters of critter_class_name
+     * @throws InvalidCritterException If some error 
+     */
+    protected static void runStatsMethod(String critter_class_name,List<Critter> res) throws InvalidCritterException{
     	try{
     	Class<?> inClass=Class.forName(myPackage+"."+critter_class_name);
     	Method inMethod=inClass.getMethod("runStats",List.class);
     			inMethod.invoke(null,res);
-    	}catch(Exception ex){//Still need to do
+    	}catch(Exception ex){
     		if(DEBUG){
     		ex.printStackTrace(System.out);
     		System.out.println("Problem in Stats method");

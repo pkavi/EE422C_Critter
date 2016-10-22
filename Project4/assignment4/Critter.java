@@ -1,17 +1,12 @@
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
- * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
- * Slip days used: <0>
+ * Pranav Kavikondala
+ * pk6994
+ * 16470
+ * Slip days used: 0
  * Fall 2016
  */
 package assignment4;
-
 import java.io.PrintStream;
 import java.util.List;
 
@@ -22,8 +17,11 @@ import java.util.List;
 
 
 /**
- * @author pkavikon
- *
+ * @author Pranav Kavikondala
+ * 
+ * Critter abstract base class from which every Critter shall extend
+ * This class takes care of simulating all critters. Any new critter made should be added to the population field of this class
+ * In addition, any Critter extending this class must implement a fight and doTimeStep method
  */
 public abstract class Critter {
 	private static String myPackage;
@@ -194,8 +192,8 @@ public abstract class Critter {
 	 * (Java weirdness: Exception throwing does not work properly if the parameter has lower-case instead of
 	 * upper. For example, if craig is supplied instead of Craig, an error is thrown instead of
 	 * an Exception.)
-	 * @param critter_class_name
-	 * @throws InvalidCritterException
+	 * @param critter_class_name String name of the critter class
+	 * @throws InvalidCritterException Problem making Critter
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
 		Class<?> in;
@@ -240,7 +238,7 @@ public abstract class Critter {
 	 * Gets a list of critters of a specific type.
 	 * @param critter_class_name What kind of Critter is to be listed.  Unqualified class name.
 	 * @return List of Critters.
-	 * @throws InvalidCritterException
+	 * @throws InvalidCritterException Problem getting instances of Critter
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
@@ -253,14 +251,12 @@ public abstract class Critter {
 			}
 			 throw new InvalidCritterException(critter_class_name);
 		}
-		//Check if object is actually isntance of critter if so initilaize it
-
+		//Check if object is actually instance of critter if so initialize it
 		for(Critter c:population){
 			if(in.isAssignableFrom(c.getClass())){
 				result.add(c);
 			}
 		}
-		
 		return result;
 	}
 	
@@ -372,7 +368,7 @@ public abstract class Critter {
 	/**
 	 * Generates algae and adds them to population
 	 */
-	public static void generateAlgae(){
+	private static void generateAlgae(){
 		Critter al;
 		int made=0;
 		while(made<Params.refresh_algae_count){
@@ -388,7 +384,7 @@ public abstract class Critter {
 	/**
 	 * Removes the dead critters from population
 	 */
-	public static void removeDead(){
+	private static void removeDead(){
 		//Remove dead critters
 		for(int i=0;i<population.size();i++){
 			if(population.get(i).energy<=0){
@@ -414,7 +410,7 @@ public abstract class Critter {
 	/**
 	 * Executes the doTimeStep() function for each Critter
 	 */
-	public static void doTimeStepForEachCritter(){
+	private static void doTimeStepForEachCritter(){
 		//Do time step for each critter
 		for(Critter c:population){
 			c.walkRun=false; 
@@ -427,7 +423,7 @@ public abstract class Critter {
 	/**
 	 * Updates the energy of each Critter and populates a 2d grid array
 	 */
-	public static void updateEnergy(){
+	private static void updateEnergy(){
 			//Update rest energy and grid
 		for(Critter c:population){
 			c.energy=c.getEnergy()-Params.rest_energy_cost;
@@ -437,9 +433,20 @@ public abstract class Critter {
 	/**
 	 * Make a new grid for every
 	 */
-	public static void makeGrid(){
-		//Have list to hold critters at each position
-		grid=new Critter[Params.world_height][Params.world_width];
+	private static void makeGrid(){
+		//Check if grid changed
+		if(grid.length!=Params.world_height){
+			grid=new Critter[Params.world_height][Params.world_width];
+		}
+		else if(grid.length>0 && grid[0].length!=Params.world_width){
+			grid=new Critter[Params.world_height][Params.world_width];
+		}
+		//Nullify grid
+		for(int i=0;i<grid.length;i++){
+			for(int j=0;j<grid[0].length;j++){
+				grid[i][j]=null;
+			}
+		}
 		//Update rest energy and grid
 		for(Critter c:population){
 			if(c.energy>0){
@@ -451,7 +458,7 @@ public abstract class Critter {
 	/**
 	 * Resolves encounters between critters
 	 */
-	public static void resolveEncountersBetweenCritters(){
+	private static void resolveEncountersBetweenCritters(){
 		//Resolve conflicts for each coordinate
 				Critter a,b;
 				boolean aFightB,bFightA;
@@ -526,7 +533,7 @@ public abstract class Critter {
 	 * Displays the top/bottom portion of the grid view plus sign followed by hyphens then a plus sign
 	 * @param length The width of the world.
 	 */
-	public static void displayHeader(int length){
+	private static void displayHeader(int length){
 		System.out.print("+");
 		for(int i=0;i<length;i++){
 			System.out.print("-");
@@ -540,7 +547,7 @@ public abstract class Critter {
 	 * @param b Second Critter
 	 * @return True if both critters are in the same location, false otherwise
 	 */
-	public static boolean sameLocation(Critter a,Critter b){
+	private static boolean sameLocation(Critter a,Critter b){
 		if(a.x_coord==b.x_coord && b.y_coord==a.y_coord){
 			return true;
 		}
@@ -550,7 +557,7 @@ public abstract class Critter {
 	/**
 	 * Checks if the current critter's location is occupied
 	 * @param a Critter
-	 * @return 
+	 * @return True if the space the critter is in is occupied
 	 */
 	public static boolean occupied(Critter a){
 		for(Critter c:population){
@@ -565,9 +572,9 @@ public abstract class Critter {
 	 * Checks if the current x and y coordinate are free
 	 * @param x X coordinate or column to check
 	 * @param y Y coordinate or row to check
-	 * @return
+	 * @return True if the (x,y) coordinate is occupied
 	 */
-	public static boolean occupied(int x, int y){
+	private static boolean occupied(int x, int y){
 		for(Critter c:population){
 			if(c.energy>0 && c.x_coord==x && c.y_coord==y){
 				return true;
